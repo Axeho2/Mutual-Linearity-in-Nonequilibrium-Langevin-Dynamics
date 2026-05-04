@@ -1,5 +1,9 @@
 # Mutual Linearity Simulation Codes
 
+Those codes are used in the paper published under the same name (arXiv: xxxx.xxxxxxx).
+
+This work is supported by the U.S. National Science Foundation under Grant No. DMR-2145256 and Alfred P. Sloan Foundation Matter-to-Life Theory Award under Grant No. G-2025-25194.
+
 This folder contains Monte Carlo simulation and plotting scripts for the F1-ATPase tilted-periodic-potential model used to test steady-state and non-stationary mutual linearity in overdamped Langevin dynamics.
 
 The code is split into simulation scripts, plotting scripts, and one convenience shell script that runs the full workflow.
