@@ -48,6 +48,7 @@ OBS_KEYS = (
     "power_B",
     "omega",
     "total_power",
+    "sigma_B",
 )
 OBS_INDEX = {key: i for i, key in enumerate(OBS_KEYS)}
 N_OBS = len(OBS_KEYS)
@@ -157,6 +158,11 @@ def accumulate_observables(
     sums,
     dt,
     F_drive,
+    T_energy,
+    U0,
+    lam,
+    z0,
+    local_width,
     period,
     state_centers,
     state_half_width,
@@ -188,6 +194,12 @@ def accumulate_observables(
     w_power = smooth_window(th_mid, power_center, power_half_width, power_edge, period)
     power_B = F_drive * w_power * vel
 
+    # Local entropy-production rate in the same sector-B window.  For this
+    # overdamped model with constant temperature, the medium entropy flow is
+    # torque * angular velocity / T_energy.
+    tau_mid = total_torque(th_mid, U0, F_drive, lam, z0, local_width, period)
+    sigma_B = w_power * tau_mid * vel / T_energy
+
     sums[0, :] += wA
     sums[1, :] += wB
     sums[2, :] += wC
@@ -196,6 +208,7 @@ def accumulate_observables(
     sums[5, :] += power_B
     sums[6, :] += vel
     sums[7, :] += F_drive * vel
+    sums[8, :] += sigma_B
 
 
 @njit(cache=True)
@@ -268,6 +281,11 @@ def simulate_steady_observables_numba(
             sums,
             dt,
             F_drive,
+            T_energy,
+            U0,
+            lam,
+            z0,
+            local_width,
             period,
             state_centers,
             state_half_width,

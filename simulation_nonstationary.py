@@ -54,6 +54,7 @@ OBS_KEYS = (
     "power_B",
     "omega",
     "total_power",
+    "sigma_B",
 )
 OBS_INDEX = {key: i for i, key in enumerate(OBS_KEYS)}
 N_OBS = len(OBS_KEYS)
@@ -150,6 +151,11 @@ def accumulate_laplace_observables(
     weights,
     dt,
     F_drive,
+    T_energy,
+    U0,
+    lam,
+    z0,
+    local_width,
     period,
     state_centers,
     density_points,
@@ -175,6 +181,12 @@ def accumulate_laplace_observables(
     power_B = F_drive * w_power * vel
     total_power = F_drive * vel
 
+    # Local entropy-production rate in the same sector-B window.  For this
+    # overdamped model with constant temperature, the medium entropy flow is
+    # torque * angular velocity / T_energy.
+    tau_mid = total_torque(th_mid, U0, F_drive, lam, z0, local_width, period)
+    sigma_B = w_power * tau_mid * vel / T_energy
+
     for io in range(weights.size):
         wdt = weights[io] * dt
         laplace_sums[io, 0, :] += wdt * wA
@@ -185,6 +197,7 @@ def accumulate_laplace_observables(
         laplace_sums[io, 5, :] += wdt * power_B
         laplace_sums[io, 6, :] += wdt * vel
         laplace_sums[io, 7, :] += wdt * total_power
+        laplace_sums[io, 8, :] += wdt * sigma_B
 
 
 @njit(cache=True)
@@ -249,6 +262,11 @@ def simulate_laplace_observables_numba(
             weights,
             dt,
             F_drive,
+            T_energy,
+            U0,
+            lam,
+            z0,
+            local_width,
             period,
             state_centers,
             density_points,

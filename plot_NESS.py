@@ -39,6 +39,7 @@ OBS_KEYS = (
     "power_B",
     "omega",
     "total_power",
+    "sigma_B",
 )
 DEFAULT_OBS_INDEX = {key: i for i, key in enumerate(OBS_KEYS)}
 
@@ -374,13 +375,13 @@ def make_all_figures(results, width, outdir="figures"):
         fit=fit,
         connect_points=connect_points,
     )
-    stats["powerB_occB"] = plot_mutual_linearity(
+    stats["sigmaB_occC"] = plot_mutual_linearity(
         results,
-        "occ_B",
-        "power_B",
-        r"$\tau_{B, \rm ss}$",
-        r"$P^{\rm in}_B$",
-        os.path.join(outdir, file_suffix + "powerB_vs_occB"),
+        "occ_C",
+        "sigma_B",
+        r"$\tau_{C, \rm ss}$",
+        r"$\sigma_B$",
+        os.path.join(outdir, file_suffix + "sigmaB_vs_occC"),
         panel_label=None,
         annotate=annotate,
         fit=fit,

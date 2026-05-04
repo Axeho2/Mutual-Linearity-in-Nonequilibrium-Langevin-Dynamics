@@ -32,6 +32,7 @@ OBS_KEYS = (
     "power_B",
     "omega",
     "total_power",
+    "sigma_B",
 )
 OBS_INDEX = {key: i for i, key in enumerate(OBS_KEYS)}
 
@@ -282,13 +283,13 @@ def make_all_figures(results, outdir="figures", prefix=file_suffix):
         os.path.join(outdir, prefix + "hat_powerB_vs_hat_occC"),
         panel_label=None,
     )
-    stats["powerB_occB"] = plot_laplace_mutual_linearity(
+    stats["sigmaB_occC"] = plot_laplace_mutual_linearity(
         results,
-        "occ_B",
-        "power_B",
-        r"$\widehat{\tau}_B(\omega)$",
-        r"$\widehat{P}^{\rm in}_B(\omega)$",
-        os.path.join(outdir, prefix + "hat_powerB_vs_hat_occB"),
+        "occ_C",
+        "sigma_B",
+        r"$\widehat{\tau}_C(\omega)$",
+        r"$\widehat{\sigma}_B(\omega)$",
+        os.path.join(outdir, prefix + "hat_sigmaB_vs_hat_occC"),
         panel_label=None,
     )
     plot_laplace_observables_vs_lambda(
