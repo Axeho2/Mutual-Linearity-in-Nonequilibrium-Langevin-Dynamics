@@ -194,11 +194,9 @@ def accumulate_observables(
     w_power = smooth_window(th_mid, power_center, power_half_width, power_edge, period)
     power_B = F_drive * w_power * vel
 
-    # Local entropy-production rate in the same sector-B window.  For this
-    # overdamped model with constant temperature, the medium entropy flow is
-    # torque * angular velocity / T_energy.
-    tau_mid = total_torque(th_mid, U0, F_drive, lam, z0, local_width, period)
-    sigma_B = w_power * tau_mid * vel / T_energy
+    # Local entropy-production rate in the same window.  With k_B=1,
+    # the medium entropy production is torque * angular velocity / T.
+    sigma_B = w_power * total_torque(th_mid, U0, F_drive, lam, z0, local_width, period) * vel / T_energy
 
     sums[0, :] += wA
     sums[1, :] += wB
@@ -402,12 +400,21 @@ def save_results_npz(filename, results, params):
     )
 
 
+def default_lambda_range(local_width):
+    """Return the production lambda range used for each Gaussian width."""
+    if math.isclose(float(local_width), 0.05, rel_tol=0.0, abs_tol=1.0e-12):
+        return -50.0, 0.0
+    return -150.0, 150.0
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Simulate steady-state mutual linearity data.")
     parser.add_argument("--broad_band", type=float, default=0.05,
                         help="Gaussian width / local_width. Used in the output filename prefix.")
-    parser.add_argument("--lambda_min", type=float, default=-50.0)
-    parser.add_argument("--lambda_max", type=float, default=0.0)
+    parser.add_argument("--lambda_min", type=float, default=None,
+                        help="Minimum perturbation strength. Default depends on broad_band: -50 for 0.05, -150 otherwise.")
+    parser.add_argument("--lambda_max", type=float, default=None,
+                        help="Maximum perturbation strength. Default depends on broad_band: 0 for 0.05, 150 otherwise.")
     parser.add_argument("--n_lambdas", type=int, default=10)
     parser.add_argument("--seed", type=int, default=20260421)
     parser.add_argument("--force", action="store_true",
@@ -423,7 +430,10 @@ def main():
     results_file = os.path.join(DATA_DIR, file_suffix + "mutual_linearity.npz")
 
     params = default_parameters(local_width=args.broad_band)
-    lambdas = np.linspace(args.lambda_min, args.lambda_max, args.n_lambdas)
+    default_min, default_max = default_lambda_range(args.broad_band)
+    lambda_min = default_min if args.lambda_min is None else args.lambda_min
+    lambda_max = default_max if args.lambda_max is None else args.lambda_max
+    lambdas = np.linspace(lambda_min, lambda_max, args.n_lambdas)
 
     if args.quick:
         params["n_traj"] = 128

@@ -11,7 +11,7 @@ Model on the unwrapped angular coordinate theta:
                     + lam * g_l(theta - z0)] dt
               + sqrt(2 mu T) dW_t .
 
-Here g_l is a periodic Gaussian shape function with fixed peak height and width
+Here g_l is an area-normalized periodic Gaussian packet with width
 set by local_width.  The perturbation strength lambda is scanned, and the same
 initial distribution is used for all lambda values.  For each trajectory we
 accumulate the Laplace transform of time-dependent state-current observables,
@@ -34,7 +34,7 @@ from numba import njit
 # 0.04, 0.5, 1.0
 band_width = 0.1
 DEFAULT_LOCAL_WIDTH = band_width
-DEFAULT_LAMBDAS = np.linspace(-150.0, 150.0, 10)
+DEFAULT_LAMBDAS = np.linspace(-120.0, 30.0, 10)
 DEFAULT_OMEGAS = np.array([2.0, 5.0, 10.0], dtype=np.float64)
 
 TWOPI = 2.0 * np.pi
@@ -76,9 +76,21 @@ def periodic_gaussian_delta(x, center, sigma, period):
 
 @njit(cache=True)
 def periodic_gaussian_shape(x, center, sigma, period):
-    """Peak-normalized periodic Gaussian shape: max value = 1 at x=center."""
-    d = periodic_diff(x, center, period)
-    return np.exp(-0.5 * (d / sigma) ** 2)
+    """
+    Area-normalized periodic Gaussian packet.
+
+    The finite image sum below is more accurate than using only the shortest
+    periodic distance, especially for broader packets.
+    """
+    d0 = periodic_diff(x, center, period)
+    g = np.zeros_like(d0)
+
+    # Images beyond +/-3 are negligible for sigma <= 1 on a 2pi-periodic circle.
+    for n in range(-3, 4):
+        d = d0 + n * period
+        g += np.exp(-0.5 * (d / sigma) ** 2)
+
+    return g / (SQRT_2PI * sigma)
 
 
 @njit(cache=True)
@@ -181,11 +193,9 @@ def accumulate_laplace_observables(
     power_B = F_drive * w_power * vel
     total_power = F_drive * vel
 
-    # Local entropy-production rate in the same sector-B window.  For this
-    # overdamped model with constant temperature, the medium entropy flow is
-    # torque * angular velocity / T_energy.
-    tau_mid = total_torque(th_mid, U0, F_drive, lam, z0, local_width, period)
-    sigma_B = w_power * tau_mid * vel / T_energy
+    # Local entropy-production rate in the same window.  With k_B=1,
+    # the medium entropy production is torque * angular velocity / T.
+    sigma_B = w_power * total_torque(th_mid, U0, F_drive, lam, z0, local_width, period) * vel / T_energy
 
     for io in range(weights.size):
         wdt = weights[io] * dt

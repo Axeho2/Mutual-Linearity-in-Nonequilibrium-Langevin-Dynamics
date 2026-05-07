@@ -148,7 +148,7 @@ def plot_laplace_mutual_linearity(
     """Plot one mutual-linearity panel with all omega values on the same axes."""
     set_style()
     omegas = results["omegas"]
-    colors = ["orange", "blue", "#B2182B"]
+    colors = ["#1B9E77", "#D95F02", "#7570B3", "#E7298A"]
     markers = ["o", "s", "^"]
 
     fig, ax = plt.subplots(
@@ -217,8 +217,7 @@ def plot_laplace_observables_vs_lambda(results, filebase):
     set_style()
     lambdas = results["lambdas"]
     omegas = results["omegas"]
-    linestyles = ["--", "-", ":"]
-    colors = ["orange", "blue", "#B2182B"]
+    colors = ["#1B9E77", "#D95F02", "#7570B3", "#E7298A"]
 
     fig, ax = plt.subplots(
         1, 1,
@@ -234,7 +233,6 @@ def plot_laplace_observables_vs_lambda(results, filebase):
             yerr=yerr,
             fmt="o-",
             color=colors[io % len(colors)],
-            ls=linestyles[io],
             ecolor="0.55",
             elinewidth=0.70,
             capsize=1.8,

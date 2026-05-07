@@ -28,10 +28,14 @@ done
 mkdir -p data figures
 
 echo "=== Run NESS simulations ==="
-for width in 0.05 0.5 1.0; do
-  echo "--- NESS width=${width} ---"
-  "$PYTHON_BIN" simulation_NESS.py --broad_band "$width" ${FORCE_ARG}
-done
+echo "--- NESS width=0.05, lambda in [-50, 0] ---"
+"$PYTHON_BIN" simulation_NESS.py --broad_band 0.05 --lambda_min -50 --lambda_max 0 ${FORCE_ARG}
+
+echo "--- NESS width=0.5, lambda in [-150, 150] ---"
+"$PYTHON_BIN" simulation_NESS.py --broad_band 0.5 --lambda_min -150 --lambda_max 150 ${FORCE_ARG}
+
+echo "--- NESS width=1.0, lambda in [-150, 150] ---"
+"$PYTHON_BIN" simulation_NESS.py --broad_band 1.0 --lambda_min -150 --lambda_max 150 ${FORCE_ARG}
 
 echo "=== Plot NESS figures ==="
 "$PYTHON_BIN" plot_NESS.py --widths 0.05 0.5 1.0
